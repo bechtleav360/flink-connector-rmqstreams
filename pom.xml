@@ -17,9 +17,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <java.version>17</java.version>
-        <spring-cloud.version>2021.0.4</spring-cloud.version>
         <flink.version>1.16.0</flink.version>
-        <springfox.version>3.0.0</springfox.version>
     </properties>
     <dependencies>
         <dependency>
@@ -50,12 +48,6 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-rabbitmq</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-rabbitmq</artifactId>
-            <version>1.16.0</version>
-        </dependency>
-
     </dependencies>
     <dependencyManagement>
 
