@@ -8,19 +8,18 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.rabbitmq.common.RMQConnectionConfig;
 
 import javax.annotation.Nullable;
+import java.io.Serializable;
 
-public class RMQStreamsConfig {
-
+public class RMQStreamsConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final StreamsClientFactory factory;
     private final String streamOut;
     private final String streamIn;
     private final RMQConnectionConfig config;
-    private Environment environment;
-
-    private OffsetSpecification offsetSpecification;
-
+    // private Environment environment;
+    //private OffsetSpecification offsetSpecification;
     private boolean usesCorrelationId;
-    private Producer producer;
+    //private Producer producer;
 
     public RMQStreamsConfig(RMQConnectionConfig config, String streamIn, @Nullable String streamOut) {
         this.config = config;
@@ -38,31 +37,30 @@ public class RMQStreamsConfig {
     }
 
     public Environment getEnvironment() {
-        if (environment == null) {
-            this.environment = this.factory.buildEnvironment();
-            this.environment.streamCreator().stream(this.streamIn).create();
-            if(StringUtils.isNotEmpty(streamOut)) this.environment.streamCreator().stream(this.streamOut).create();
-        }
+        Environment environment = this.factory.buildEnvironment();
+        environment.streamCreator().stream(this.streamIn).create();
+        if(StringUtils.isNotEmpty(streamOut)) environment.streamCreator().stream(this.streamOut).create();
+
         return environment;
     }
 
     public Producer getProducer() {
-        if(producer == null) {
+
             String stream = StringUtils.isNotEmpty(streamOut) ? streamOut : streamIn;
-            this.producer = this.factory.buildProducer(this.getEnvironment(), stream);
-        }
-        return this.producer;
+            Producer producer = this.factory.buildProducer(this.getEnvironment(), stream);
+
+        return producer;
     }
 
     public Consumer getConsumer(QueuedMessageHandler<?> handler) {
-        OffsetSpecification offsetSpecification = this.offsetSpecification != null ? this.offsetSpecification : OffsetSpecification.last();
-
+        //OffsetSpecification offsetSpecification = this.offsetSpecification != null ? this.offsetSpecification : OffsetSpecification.last();
+        OffsetSpecification offsetSpecification = OffsetSpecification.first();
         return this.factory.buildConsumer(this.getEnvironment(), handler, this.streamIn, offsetSpecification);
     }
 
-    public void setOffsetSpecification(OffsetSpecification offsetSpecification) {
-        this.offsetSpecification = offsetSpecification;
-    }
+//    public void setOffsetSpecification(OffsetSpecification offsetSpecification) {
+//        this.offsetSpecification = offsetSpecification;
+//    }
 
     public void setUsesCorrelationId(boolean usesCorrelationId) {
         this.usesCorrelationId = usesCorrelationId;

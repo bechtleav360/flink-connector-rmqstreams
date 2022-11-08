@@ -8,11 +8,12 @@ import com.rabbitmq.stream.Producer;
 import org.apache.flink.streaming.connectors.rabbitmq.common.RMQConnectionConfig;
 
 import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
-public class StreamsClientFactory {
-
+public class StreamsClientFactory implements Serializable {
+    private static final long serialVersionUID = 1L;
     private RMQConnectionConfig config;
     private String stream;
 
