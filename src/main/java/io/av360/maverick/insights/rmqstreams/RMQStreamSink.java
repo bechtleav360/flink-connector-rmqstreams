@@ -1,11 +1,10 @@
-package com.bechtle.maverick.insights.rmqstreams;
+package io.av360.maverick.insights.rmqstreams;
 
-import com.bechtle.maverick.insights.rmqstreams.config.RMQStreamsConfig;
 import com.rabbitmq.stream.Environment;
 import com.rabbitmq.stream.Message;
 import com.rabbitmq.stream.Producer;
+import io.av360.maverick.insights.rmqstreams.config.RMQStreamsConfig;
 import org.apache.flink.api.common.serialization.SerializationSchema;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.streaming.connectors.rabbitmq.RMQSinkPublishOptions;
 import org.apache.flink.streaming.connectors.rabbitmq.SerializableReturnListener;

@@ -1,19 +1,17 @@
-package com.bechtle.maverick.insights.rmqstreams;
+package io.av360.maverick.insights.rmqstreams;
 
-import com.bechtle.maverick.insights.rmqstreams.config.RMQStreamsConfig;
-import com.bechtle.maverick.insights.rmqstreams.extensions.MessageCollector;
-import com.bechtle.maverick.insights.rmqstreams.extensions.MessageDeserializationWrapper;
-import com.bechtle.maverick.insights.rmqstreams.extensions.QueuedMessageHandler;
+import io.av360.maverick.insights.rmqstreams.config.RMQStreamsConfig;
+import io.av360.maverick.insights.rmqstreams.extensions.MessageCollector;
+import io.av360.maverick.insights.rmqstreams.extensions.MessageDeserializationWrapper;
+import io.av360.maverick.insights.rmqstreams.extensions.QueuedMessageHandler;
 import com.rabbitmq.stream.*;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
+import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 
 public class RMQStreamSource<OUT> extends RichSourceFunction<OUT> {
     private static final Logger LOG = LoggerFactory.getLogger(RMQStreamSource.class);
@@ -32,22 +30,30 @@ public class RMQStreamSource<OUT> extends RichSourceFunction<OUT> {
 
     @Override
     public void run(SourceContext<OUT> sourceContext) throws Exception {
+        LOG.info("Running event consumer as stream source");
+
         QueuedMessageHandler<OUT> handler = new QueuedMessageHandler<>();
         MessageCollector<OUT> collector = new MessageCollector<>(sourceContext);
 
         try(Consumer ignored = this.config.getConsumer(handler)) {
-            LOG.info("Starting consumer loop.");
+            LOG.info("Starting consumer loop ...");
             while(isRunning) {
-                Message next = handler.next(sourceContext);  // blocking
-                this.processMessage(next, collector);
+                Message next = handler.next(sourceContext);  // blocking until timeout, then null
+                if(next != null) {
+                    this.processMessage(next, collector);
+                }
+
             }
         } catch (Exception e) {
             LOG.error("Exception while consuming events from stream", e);
         }
     }
 
-    private void processMessage(Message message, MessageCollector<OUT> collector) throws IOException {
-        collector.extractParameter(message);
+    protected void processMessage(Message message, Collector<OUT> collector) throws IOException {
+        this.parse(message, collector);
+    }
+
+    protected void parse(Message message, Collector<OUT> collector) throws IOException {
         this.deliveryDeserializer.deserialize(message.getBodyAsBinary(), collector);
     }
 

@@ -1,4 +1,4 @@
-package com.bechtle.maverick.insights.rmqstreams.extensions;
+package io.av360.maverick.insights.rmqstreams.extensions;
 
 import com.rabbitmq.stream.Message;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
@@ -28,6 +28,6 @@ public class QueuedMessageHandler<OUT> implements com.rabbitmq.stream.MessageHan
     }
 
     public Message next(SourceFunction.SourceContext<OUT> sourceContext) throws InterruptedException {
-        return this.queue.poll(500, TimeUnit.MILLISECONDS);
+        return this.queue.poll(2000, TimeUnit.MILLISECONDS);
     }
 }

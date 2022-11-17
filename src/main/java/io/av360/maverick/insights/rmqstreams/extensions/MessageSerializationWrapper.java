@@ -1,4 +1,4 @@
-package com.bechtle.maverick.insights.rmqstreams.extensions;
+package io.av360.maverick.insights.rmqstreams.extensions;
 
 import org.apache.flink.api.common.serialization.SerializationSchema;
 
