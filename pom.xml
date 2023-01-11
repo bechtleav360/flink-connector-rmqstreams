@@ -95,5 +95,24 @@
 
         </dependencies>
     </dependencyManagement>
+         
+    <repositories>
+        <repository>
+            <id>flinkjobs</id>
+            <url>https://pkgs.dev.azure.com/av360/_packaging/flinkjobs/maven/v1</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
+    <distributionManagement>
+        <repository>
+            <id>flinkjobs</id>
+            <url>https://pkgs.dev.azure.com/av360/_packaging/flinkjobs/maven/v1</url>
+        </repository>
+    </distributionManagement>
 </project>
