@@ -6,7 +6,7 @@
     <packaging>jar</packaging>
 
 
-    <groupId>com.bechtle.maverick.insights</groupId>
+    <groupId>io.av360.maverick.insights</groupId>
     <artifactId>flink-connector-rabbitmq-streams</artifactId>
     <version>${revision}</version>
     <name>Flink Connector RabbitMQ Streams</name>
