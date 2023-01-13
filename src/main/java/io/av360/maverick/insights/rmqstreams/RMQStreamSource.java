@@ -57,6 +57,8 @@ public class RMQStreamSource<OUT> extends RichSourceFunction<OUT> {
         this.deliveryDeserializer.deserialize(message.getBodyAsBinary(), collector);
     }
 
+
+
     @Override
     public void cancel() {
         this.isRunning = false;
