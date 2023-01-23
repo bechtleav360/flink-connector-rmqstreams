@@ -5,19 +5,22 @@ import io.av360.maverick.insights.rmqstreams.extensions.MessageCollector;
 import io.av360.maverick.insights.rmqstreams.extensions.MessageDeserializationWrapper;
 import io.av360.maverick.insights.rmqstreams.extensions.QueuedMessageHandler;
 import com.rabbitmq.stream.*;
+import io.cloudevents.jackson.JsonFormat;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
+import org.apache.flink.shaded.guava30.com.google.common.net.MediaType;
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
 import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class RMQStreamSource<OUT> extends RichSourceFunction<OUT> {
     private static final Logger LOG = LoggerFactory.getLogger(RMQStreamSource.class);
     private final RMQStreamsConfig config;
 
-    private final DeserializationSchema<OUT> deliveryDeserializer;
+    private final MessageDeserializationWrapper<OUT> deliveryDeserializer;
 
     private volatile boolean isRunning = true;
 
@@ -50,11 +53,36 @@ public class RMQStreamSource<OUT> extends RichSourceFunction<OUT> {
     }
 
     protected void processMessage(Message message, Collector<OUT> collector) throws IOException {
-        this.parse(message, collector);
+        String contentType = message.getProperties().getContentType();
+
+        // binary content mode
+        if(contentType.contentEquals(MediaType.JSON_UTF_8.toString())) {
+            LOG.trace("Consuming CloudEvent in binary content mode.");
+            this.parseBinary(message, collector);
+        // Structured Content Mode
+        } else if(contentType.contentEquals(JsonFormat.CONTENT_TYPE)) {
+            LOG.trace("Consuming CloudEvent in structured content mode.");
+            this.parseStructured(message, collector);
+        } else {
+            LOG.warn("Skipping event with content-type '{}', not a cloud event", contentType);
+        }
+
+
     }
 
-    protected void parse(Message message, Collector<OUT> collector) throws IOException {
+    protected void parseBinary(Message message, Collector<OUT> collector) throws IOException {
+        this.deliveryDeserializer.deserialize(message, collector);
+    }
+
+
+    protected void parseStructured(Message message, Collector<OUT> collector) throws IOException {
+        if(Objects.isNull(message.getBody())) {
+            LOG.warn("Skipping CloudEvent in structured content mode with no payload.");
+            return;
+        }
+
         this.deliveryDeserializer.deserialize(message.getBodyAsBinary(), collector);
+
     }
 
 

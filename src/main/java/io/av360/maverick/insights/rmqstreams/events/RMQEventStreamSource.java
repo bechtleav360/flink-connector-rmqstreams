@@ -15,7 +15,7 @@ public class RMQEventStreamSource extends RMQStreamSource<CloudEvent> {
     private Set<String> filtered_types;
 
     public RMQEventStreamSource(RMQStreamsConfig config, @Nullable Set<String> filtered_types) {
-        super(config, new CloudEventSchema());
+        super(config, new CloudEventDeserializer());
         this.filtered_types = filtered_types;
     }
 

@@ -11,6 +11,6 @@ import javax.annotation.Nullable;
 public class RMQEventStreamSink extends RMQStreamSink<CloudEvent> {
 
     public RMQEventStreamSink(RMQStreamsConfig config, @Nullable RMQSinkPublishOptions<CloudEvent> publishOptions, @Nullable SerializableReturnListener returnListener) {
-        super(config, new CloudEventSchema(), publishOptions, returnListener);
+        super(config, new CloudEventSerializer(), publishOptions, returnListener);
     }
 }
