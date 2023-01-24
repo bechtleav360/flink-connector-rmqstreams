@@ -19,7 +19,6 @@ public class RMQStreamsConfig implements Serializable {
     private final String streamOut;
     private final String streamIn;
     private final RMQConnectionConfig connectionConfig;
-    private final OffsetSpecification offsetSpecification = OffsetSpecification.first();
     private boolean usesCorrelationId;
 
     public RMQStreamsConfig(RMQConnectionConfig config, String streamIn, @Nullable String streamOut) {
@@ -71,8 +70,8 @@ public class RMQStreamsConfig implements Serializable {
 
     public Consumer getConsumer(QueuedMessageHandler<?> handler) {
         LOG.info("Creating consumer for stream '{}'", this.streamIn);
-        OffsetSpecification offsetSpecification = this.offsetSpecification != null ? this.offsetSpecification : OffsetSpecification.first();
-        return new StreamsClientFactory(this.getConnectionConfig()).buildConsumer(this.getEnvironment(), handler, this.streamIn, offsetSpecification);
+        // OffsetSpecification offsetSpecification = this.offsetSpecification != null ? this.offsetSpecification : OffsetSpecification.first();
+        return new StreamsClientFactory(this.getConnectionConfig()).buildConsumer(this.getEnvironment(), handler, this.streamIn, OffsetSpecification.first());
     }
 
 //    public void setOffsetSpecification(OffsetSpecification offsetSpecification) {
