@@ -10,6 +10,7 @@ import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.shaded.guava30.com.google.common.net.MediaType;
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
 import org.apache.flink.util.Collector;
+import org.apache.flink.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,21 @@ public class RMQStreamSource<OUT> extends RichSourceFunction<OUT> {
     }
 
     protected void processMessage(Message message, Collector<OUT> collector) throws IOException {
+        if(Objects.isNull(message)) {
+            LOG.warn("Skipping null message");
+            return;
+        }
+
+        if(Objects.isNull(message.getProperties())) {
+            LOG.warn("Skipping message without properties");
+            return;
+        }
+
         String contentType = message.getProperties().getContentType();
+        if(StringUtils.isNullOrWhitespaceOnly(contentType)) {
+            LOG.warn("Skipping message without valid content type in properties");
+            return;
+        }
 
         // binary content mode
         if(contentType.contentEquals(MediaType.JSON_UTF_8.toString())) {
