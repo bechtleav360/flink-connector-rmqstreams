@@ -50,6 +50,7 @@ public class RMQStreamSource<OUT> extends RichSourceFunction<OUT> {
             }
         } catch (Exception e) {
             LOG.error("Exception while consuming events from stream", e);
+            throw e;
         }
     }
 
@@ -60,7 +61,12 @@ public class RMQStreamSource<OUT> extends RichSourceFunction<OUT> {
         }
 
         if(Objects.isNull(message.getProperties())) {
-            LOG.warn("Skipping message without properties");
+            if(message.hasPublishingId()) {
+                LOG.warn("Skipping message '{}' without properties", message.getPublishingId());
+                LOG.trace("Message Annotations: {}", message.getMessageAnnotations());
+                LOG.trace("Message application properties: {}", message.getApplicationProperties());
+            } else LOG.warn("Skipping message without properties and publishing id");
+
             return;
         }
 

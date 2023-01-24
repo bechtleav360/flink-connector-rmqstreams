@@ -5,6 +5,7 @@ import org.apache.flink.api.common.functions.FilterFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -12,22 +13,31 @@ import java.util.Set;
  */
 public class EventFilter implements FilterFunction<CloudEvent> {
     private static final Logger LOG = LoggerFactory.getLogger(EventFilter.class);
-    private Set<String> supportedEventTypes;
+    private final Set<String> supportedEventTypes;
 
 
     public EventFilter(Set<String> supportedEventTypes) {
-        this.supportedEventTypes = supportedEventTypes;
+        this.supportedEventTypes = new HashSet<>(supportedEventTypes);
+    }
+
+    public EventFilter() {
+        this(Set.of());
     }
 
     @Override
     public boolean filter(CloudEvent value) throws Exception {
+        if(value == null) {
+            LOG.warn("Skipping null event.");
+            return false;
+        }
+
         if(value.getId() == null || value.getId().isEmpty()) {
             LOG.warn("Skipping event with missing identifier");
             return false;
         }
 
         if(value.getType() == null || value.getType().isEmpty()) {
-            LOG.warn("Skipping event with id {} is missing a type definition", value.getId());
+            LOG.warn("Skipping event with id {} which is missing a type definition", value.getId());
             return false;
         }
 

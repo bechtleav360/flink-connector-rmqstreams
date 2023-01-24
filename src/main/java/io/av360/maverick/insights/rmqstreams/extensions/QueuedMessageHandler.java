@@ -8,7 +8,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class QueuedMessageHandler<OUT> implements com.rabbitmq.stream.MessageHandler {
-    private SourceFunction.SourceContext<OUT> sourceContext;
     private final BlockingQueue<Message> queue;
 
     public QueuedMessageHandler() {

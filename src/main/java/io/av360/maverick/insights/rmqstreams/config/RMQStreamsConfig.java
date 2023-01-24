@@ -19,10 +19,8 @@ public class RMQStreamsConfig implements Serializable {
     private final String streamOut;
     private final String streamIn;
     private final RMQConnectionConfig connectionConfig;
-    // private Environment environment;
-    //private OffsetSpecification offsetSpecification;
+    private final OffsetSpecification offsetSpecification = OffsetSpecification.first();
     private boolean usesCorrelationId;
-    //private Producer producer;
 
     public RMQStreamsConfig(RMQConnectionConfig config, String streamIn, @Nullable String streamOut) {
         this.connectionConfig = config;
@@ -53,12 +51,12 @@ public class RMQStreamsConfig implements Serializable {
     }
 
     public Environment getEnvironment() {
-        LOG.info("Creating environment");
+        LOG.info("Creating environment required to connect to a RabbitMQ Stream.");
         Environment environment = new StreamsClientFactory(this.getConnectionConfig()).buildEnvironment();
 
         this.validateStream(environment, this.streamIn);
 
-        if(StringUtils.isNotEmpty(streamOut)) {
+        if (StringUtils.isNotEmpty(streamOut)) {
             this.validateStream(environment, this.streamOut);
         }
 
@@ -67,16 +65,13 @@ public class RMQStreamsConfig implements Serializable {
 
     public Producer getProducer() {
 
-            String stream = StringUtils.isNotEmpty(streamOut) ? streamOut : streamIn;
-            Producer producer = new StreamsClientFactory(this.getConnectionConfig()).buildProducer(this.getEnvironment(), stream);
-
-        return producer;
+        String stream = StringUtils.isNotEmpty(streamOut) ? streamOut : streamIn;
+        return new StreamsClientFactory(this.getConnectionConfig()).buildProducer(this.getEnvironment(), stream);
     }
 
     public Consumer getConsumer(QueuedMessageHandler<?> handler) {
-        LOG.info("Creating consumer");
-        //OffsetSpecification offsetSpecification = this.offsetSpecification != null ? this.offsetSpecification : OffsetSpecification.last();
-        OffsetSpecification offsetSpecification = OffsetSpecification.first();
+        LOG.info("Creating consumer for stream '{}'", this.streamIn);
+        OffsetSpecification offsetSpecification = this.offsetSpecification != null ? this.offsetSpecification : OffsetSpecification.first();
         return new StreamsClientFactory(this.getConnectionConfig()).buildConsumer(this.getEnvironment(), handler, this.streamIn, offsetSpecification);
     }
 
